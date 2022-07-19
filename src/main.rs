@@ -2,25 +2,30 @@ mod vec3;
 mod color;
 mod ray;
 mod hittable;
+mod hittable_list;
 mod sphere;
+
+use std::f64::INFINITY;
 
 use vec3::{Vec3, Point3};
 use color::{Color, write_color};
 use ray::Ray;
 use hittable::Hit_Record;
+use hittable::Hittable;
+use hittable_list::Hittable_List;
 use sphere::Sphere;
 
-fn ray_color(r: Ray) -> Color {
-    let t: f64 = hit_sphere(Point3::new(0.0,0.0,-1.0), 0.5, r);
-    if t > 0.0 {
-        let N: Vec3 = (r.at(t) - Vec3::new(0.0, 0.0, -1.0)).normalize();
-        return Color::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0) * 0.5;
+fn ray_color(r: Ray, world: &Box<dyn Hittable>) -> Color {
+    let mut rec : Hit_Record = Hit_Record::default();
+    
+    if world.hit(r, 0.0, INFINITY, &mut rec) {
+	return (rec.normal() + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
 
-    let unit_direction = r.direction().normalize();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    
-    return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t;
+    let unit_direction : Vec3 = r.direction().normalize();
+    let t : f64 = 0.5 * (unit_direction.y() + 1.0);
+
+    return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
 fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
@@ -43,6 +48,17 @@ fn main() {
     let image_width: i32 = 400;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
 
+    // World
+
+    // Vec<Box<dyn Hittable>>
+    let mut object_list : Vec<Box<dyn Hittable>> = Vec::new();
+
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.0, -1.0), 100.0)));    
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+
+    
+    let world : Box<dyn Hittable> = Box::new(Hittable_List::new(object_list));
+
     // Camera
     let viewport_height: f64 = 2.0;
     let viewport_width: f64 = aspect_ratio * viewport_height;
@@ -64,7 +80,7 @@ fn main() {
             let u: f64 = (j as f64) / ((image_width - 1) as f64);
             let v: f64 = (i as f64) / ((image_height - 1) as f64);
             let r: Ray = Ray::ray(origin, lower_left_corner + horizontal * u + vertical * v - origin);
-            let pixel_color: Color = ray_color(r);
+            let pixel_color: Color = ray_color(r, &world);
 
             write_color(pixel_color)
         }
