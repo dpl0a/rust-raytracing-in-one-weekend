@@ -9,7 +9,7 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn sphere(center: Vec3, radius: f64) -> Self {
+    pub fn new(center: Vec3, radius: f64) -> Self {
         Self { center, radius }
     }
 }
@@ -36,7 +36,9 @@ impl Hittable for Sphere {
         }
         rec.set_t(root);
         rec.set_p(r.at(rec.t()));
-        rec.set_normal((rec.p() - self.center) / self.radius);
+
+	let outward_normal : Vec3 = (rec.p() - self.center) / self.radius;
+	rec.set_face_normal(r, outward_normal);
 
         return true;
     }
