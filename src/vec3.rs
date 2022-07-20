@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
+use rand::prelude::Rng;
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct Vec3 {
@@ -57,12 +58,29 @@ impl Vec3 {
     pub fn normalize(self) -> Self {
         self / self.len()
     }
+
+    pub fn random(min: f64, max: f64) -> Self {
+        let mut rng = rand::thread_rng();
+
+        Self { e: [rng.gen_range(min..max), rng.gen_range(min..max), rng.gen_range(min..max)] }
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        let mut rng = rand::thread_rng();
+        loop {
+            let p: Vec3 = Self { e: [rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)] };
+            if p.sqlen() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
+    }
 }
 
 impl Add for Vec3 {
     type Output = Self;
 
-    fn add(self, other : Self) -> Self::Output {
+    fn add(self, other: Self) -> Self::Output {
         Self { e: [self.e[0] + other.e[0], 
                    self.e[1] + other.e[1], 
                    self.e[2] + other.e[2]] }
