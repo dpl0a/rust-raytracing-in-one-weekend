@@ -42,20 +42,6 @@ fn ray_color(r: Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
-fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
-    let oc: Vec3 = r.origin() - center;
-    let a: f64 = r.direction().sqlen();
-    let b: f64 = Vec3::dot(oc, r.direction());
-    let c: f64 = oc.sqlen() - radius * radius;
-    let discriminant: f64 = b * b - a * c;
-
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        return (-b - discriminant.sqrt()) / a;
-    }
-}
-
 fn main() {
     // Image
     let aspect_ratio: f64 = 16.0 / 9.0;
@@ -69,8 +55,8 @@ fn main() {
 
     let material_ground: Material = Material::new_lambertian(Color::new(0.8, 0.8, 0.0));
     let material_center: Material = Material::new_lambertian(Color::new(0.7, 0.3, 0.3));
-    let material_left: Material = Material::new_metal(Color::new(0.8, 0.8, 0.8));
-    let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2));
+    let material_left: Material = Material::new_metal(Color::new(0.8, 0.8, 0.8), 0.3);
+    let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 1.0);
 
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));

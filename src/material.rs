@@ -6,7 +6,7 @@ use crate::hittable::HitRecord;
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
     Lambertian { albedo: Color },
-    Metal { albedo: Color },
+    Metal { albedo: Color, fuzz: f64 },
 }
 
 pub fn reflect(u: Vec3, n: Vec3) -> Vec3 {
@@ -28,22 +28,11 @@ impl Material {
                 *attenuation = *albedo;
                 return true;
             }
-            Self::Metal { albedo } => {
+            Self::Metal { albedo, fuzz } => {
                 let reflected: Vec3 = reflect(r_in.direction(), rec.normal());
-                *scattered = Ray::new(rec.p(), reflected);
+                *scattered = Ray::new(rec.p(), reflected + Vec3::random_in_unit_sphere() * *fuzz );
                 *attenuation = *albedo;
                 Vec3::dot(scattered.direction(), rec.normal()) > 0.0
-            }
-        }
-    }
-
-    pub fn albedo(self) -> Color {
-        match self {
-            Self::Lambertian { albedo } => {
-                albedo
-            }
-            Self::Metal { albedo } => {
-                albedo
             }
         }
     }
@@ -52,8 +41,8 @@ impl Material {
         Self::Lambertian { albedo: albedo }
     }
 
-    pub fn new_metal(albedo: Color) -> Material {
-        Self::Metal { albedo: albedo }
+    pub fn new_metal(albedo: Color, fuzz: f64) -> Material {
+        Self::Metal { albedo: albedo, fuzz: fuzz }
     }
 }
 

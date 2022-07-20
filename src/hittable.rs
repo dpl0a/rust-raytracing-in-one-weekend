@@ -24,6 +24,10 @@ impl HitRecord {
         self.normal
     }
 
+    pub fn front_face(self) -> bool {
+        self.front_face()
+    }
+
     pub fn material(self) -> Material {
         self.material
     }
