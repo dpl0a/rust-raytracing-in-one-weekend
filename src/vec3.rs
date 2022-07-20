@@ -49,7 +49,7 @@ impl Vec3 {
         u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
     }
 
-    pub fn cross(u: Self, v: Self) -> Vec3 {
+    pub fn cross(u: Self, v: Self) -> Self {
         Self { e: [u.e[1] * v.e[2] - u.e[2] * v.e[1], 
                    u.e[2] * v.e[0] - u.e[0] * v.e[2], 
                    u.e[0] * v.e[1] - u.e[1] * v.e[0]] }
@@ -75,6 +75,11 @@ impl Vec3 {
             return p;
         }
     }
+
+    pub fn near_zero(self) -> bool {
+        let s: f64 = 1e-8;
+        (self.e[0].abs() < s) && (self.e[1].abs() < s) && (self.e[2].abs() < s)
+    }
 }
 
 impl Add for Vec3 {
@@ -97,6 +102,16 @@ impl Sub for Vec3 {
     }
 }
 
+impl Sub<f64> for Vec3 {
+    type Output = Self;
+
+    fn sub(self, k: f64) -> Self::Output {
+        Self { e: [self.e[0] - k, 
+                   self.e[1] - k, 
+                   self.e[2] - k] }
+    }
+}
+
 impl Neg for Vec3 {
     type Output = Self;
 
@@ -104,6 +119,16 @@ impl Neg for Vec3 {
         Self { e: [-self.e[0], 
                    -self.e[1], 
                    -self.e[2]] }
+    }
+}
+
+impl Mul for Vec3 {
+    type Output= Self;
+
+    fn mul(self, other: Self) -> Self::Output {
+        Self { e: [self.e[0] * other.e[0],
+                   self.e[1] * other.e[1],
+                   self.e[2] * other.e[2],] }
     }
 }
 

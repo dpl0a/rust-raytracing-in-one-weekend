@@ -5,6 +5,7 @@ mod hittable;
 mod hittable_list;
 mod sphere;
 mod camera;
+mod material;
 
 use std::f64::INFINITY;
 use rand::prelude::Rng;
@@ -16,7 +17,8 @@ use hittable::HitRecord;
 use hittable::Hittable;
 use hittable_list::HittableList;
 use sphere::Sphere;
-use camera::*;
+use camera::Camera;
+use material::Material;
 
 fn ray_color(r: Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     let mut rec: HitRecord = HitRecord::default();
@@ -27,13 +29,16 @@ fn ray_color(r: Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     }
     
     if world.hit(r, 0.001, INFINITY, &mut rec) {
-        let target: Point3 = rec.p() + rec.normal() + Vec3::random_in_unit_sphere().normalize();
-        return ray_color(Ray::new(rec.p(), target - rec.p()), world, depth - 1) * 0.5;
+        let mut scattered: Ray = Ray::default();
+        let mut attenuation: Color = Color::default();
+        if rec.material().scatter(r, &rec, &mut attenuation, &mut scattered) {
+            return attenuation * ray_color(scattered, world, depth - 1);
+        }
+        return Color::default();
     }
 
     let unit_direction: Vec3 = r.direction().normalize();
     let t: f64 = 0.5 * (unit_direction.y() + 1.0);
-
     return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
@@ -60,9 +65,17 @@ fn main() {
     let max_depth: i32 = 50;
 
     // World
-    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();   
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0))); 
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+
+    let material_ground: Material = Material::new_lambertian(Color::new(0.8, 0.8, 0.0));
+    let material_center: Material = Material::new_lambertian(Color::new(0.7, 0.3, 0.3));
+    let material_left: Material = Material::new_metal(Color::new(0.8, 0.8, 0.8));
+    let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2));
+
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));
+    object_list.push(Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left)));
+    object_list.push(Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right)));
 
     let world: Box<dyn Hittable> = Box::new(HittableList::new(object_list));
 
