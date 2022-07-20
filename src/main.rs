@@ -7,26 +7,26 @@ mod sphere;
 mod camera;
 
 use std::f64::INFINITY;
-use rand::prelude::*;
+use rand::prelude::Rng;
 
 use vec3::{Vec3, Point3};
 use color::{Color, write_color};
 use ray::Ray;
-use hittable::Hit_Record;
+use hittable::HitRecord;
 use hittable::Hittable;
-use hittable_list::Hittable_List;
+use hittable_list::HittableList;
 use sphere::Sphere;
 use camera::*;
 
 fn ray_color(r: Ray, world: &Box<dyn Hittable>) -> Color {
-    let mut rec : Hit_Record = Hit_Record::default();
+    let mut rec: HitRecord = HitRecord::default();
     
     if world.hit(r, 0.0, INFINITY, &mut rec) {
 	return (rec.normal() + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
 
-    let unit_direction : Vec3 = r.direction().normalize();
-    let t : f64 = 0.5 * (unit_direction.y() + 1.0);
+    let unit_direction: Vec3 = r.direction().normalize();
+    let t: f64 = 0.5 * (unit_direction.y() + 1.0);
 
     return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
@@ -48,16 +48,16 @@ fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
 fn main() {
     // Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: i32 = 400;
+    let image_width: i32 = 7680;
     let image_height: i32 = ((image_width as f64) / aspect_ratio) as i32;
-    let samples_per_pixel: i32 = 100;
+    let samples_per_pixel: i32 = 1000;
 
     // World
-    let mut object_list : Vec<Box<dyn Hittable>> = Vec::new();   
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();   
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0))); 
 
-    let world : Box<dyn Hittable> = Box::new(Hittable_List::new(object_list));
+    let world: Box<dyn Hittable> = Box::new(HittableList::new(object_list));
 
     // Camera
     let cam = Camera::default();
@@ -67,11 +67,11 @@ fn main() {
 
     //Render
     println!("P3");
-    println!("{} {}" , image_width , image_height);
+    println!("{} {}", image_width, image_height);
     println!("255");
 
     for i in (0..image_height).rev() {
-        eprintln!("Scanlines remaining: {} " , i);
+        eprintln!("Scanlines remaining: {} ", i);
         for j in 0..image_width {
             let mut pixel_color: Color = Color::new(0.0, 0.0, 0.0);
             for s in 0..samples_per_pixel {
