@@ -25,7 +25,7 @@ fn ray_color(r: Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
 
     //If we've exceeded the ray bounce limit, no more light is gathered.
     if depth <= 0 {
-        return Color::new(0.0, 0.0, 0.0);
+        return Color::default();
     }
     
     if world.hit(r, 0.001, INFINITY, &mut rec) {
@@ -54,9 +54,11 @@ fn main() {
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
 
     let material_ground: Material = Material::new_lambertian(Color::new(0.8, 0.8, 0.0));
-    let material_center: Material = Material::new_lambertian(Color::new(0.7, 0.3, 0.3));
-    let material_left: Material = Material::new_metal(Color::new(0.8, 0.8, 0.8), 0.3);
-    let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 1.0);
+    let material_center: Material = Material::new_lambertian(Color::new(0.1, 0.2, 0.5));
+    //let material_left: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 0.1);
+    //let material_center: Material = Material::new_dielectric(1.5);
+    let material_left: Material = Material::new_dielectric(1.5);
+    let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 0.0);
 
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));

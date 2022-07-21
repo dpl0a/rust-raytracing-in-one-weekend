@@ -12,7 +12,7 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
-        Self { center, radius , material}
+        Self { center, radius, material}
     }
 }
 
@@ -29,7 +29,7 @@ impl Hittable for Sphere {
         }
 
         let sqrtd: f64 = discriminant.sqrt();
-        let mut root: f64 = (-b -sqrtd) / a;
+        let mut root: f64 = (-b - sqrtd) / a;
         if (root < t_min) || (t_max < root) {
             root = (-b + sqrtd) / a;
             if (root < t_min) || (t_max < root) {
@@ -37,7 +37,7 @@ impl Hittable for Sphere {
             }
         }
         rec.set_t(root);
-        rec.set_p(r.at(rec.t()));
+        rec.set_p(r.at(root));
         let outward_normal: Vec3 = (rec.p() - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
         rec.set_material(self.material);

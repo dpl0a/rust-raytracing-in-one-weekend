@@ -25,7 +25,7 @@ impl HitRecord {
     }
 
     pub fn front_face(self) -> bool {
-        self.front_face()
+        self.front_face
     }
 
     pub fn material(self) -> Material {
@@ -49,13 +49,8 @@ impl HitRecord {
     }
 
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
-	self.front_face = Vec3::dot(r.direction(), outward_normal) < 0.0;
-
-	if self.front_face {
-	    self.normal = outward_normal
-	} else {
-	    self.normal = -outward_normal
-	}
+	    self.front_face = Vec3::dot(r.direction(), outward_normal) < 0.0;
+        self.normal = if self.front_face() { outward_normal } else { -outward_normal }
     }
 }
 
