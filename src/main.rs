@@ -19,7 +19,7 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
         Some(rec) => {
             match rec.material.scatter(r, &rec) {
                 Some((Some(scattered), attenuation)) => {
-                    attenuation * ray_color(&scattered, world, depth -1)
+                    attenuation * ray_color(&scattered, world, depth - 1)
                 }
                 _ => {
                     Color::default()
@@ -28,7 +28,7 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
         }
         None => {
             let unit_direction: Vec3 = r.direction.normalize();
-            let t: f64 = 0.5 * (unit_direction.e[1] + 1.0);
+            let t: f64 = 0.5 * (unit_direction.y + 1.0);
             Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
         }
     }
@@ -47,22 +47,28 @@ fn main() {
     // World
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
 
+    
     let material_ground: Material = Material::new_lambertian(Color::new(0.8, 0.8, 0.0));
     let material_center: Material = Material::new_lambertian(Color::new(0.1, 0.2, 0.5));
-    //let material_left: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 0.1);
-    //let material_center: Material = Material::new_dielectric(1.5);
     let material_left: Material = Material::new_dielectric(1.5);
     let material_right: Material = Material::new_metal(Color::new(0.8, 0.6, 0.2), 0.0);
 
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));
+    object_list.push(Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left)));
     object_list.push(Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.45, material_left)));
     object_list.push(Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right)));
+    
 
     let world: Box<dyn Hittable> = Box::new(HittableList::new(object_list));
 
     // Camera
-    let cam = Camera::default();
+    let lookfrom: Point3 = Point3::new(3.0, 3.0, 2.0);
+    let lookat: Point3 = Point3::new(0.0, 0.0, -1.0);
+    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus: f64 = (lookfrom - lookat).len();
+    let aperture: f64 = 2.0;
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
     // Initialize rng?
     let mut rng = rand::thread_rng();

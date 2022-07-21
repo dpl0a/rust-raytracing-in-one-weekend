@@ -90,3 +90,22 @@ impl Default for Material { // Stupid bodge
         Self::Lambertian { albedo: Color::default() }
     }
 }
+
+#[test]
+fn test_reflectance() {
+    let cosine = 0.0;
+    let ref_idx = 1.5;
+    let expected = 1.0;
+    let actual = reflectance(cosine, ref_idx);
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn test_refract() {
+    let uv = Vec3::new(1.0, 1.0, 0.0);
+    let n = Vec3::new(-1.0, 0.0, 0.0);
+    let etai_over_etat = 1.0;
+    let expected = Vec3::new(0.0, 1.0, 0.0);
+    let actual = refract(uv, n, etai_over_etat);
+    assert_eq!(actual, expected);
+}
