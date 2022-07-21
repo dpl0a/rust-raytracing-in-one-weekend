@@ -11,21 +11,26 @@ use ray_tracing_weekend::camera::Camera;
 use ray_tracing_weekend::material::Material;
 
 fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
-    //If we've exceeded the ray bounce limit, no more light is gathered.
     if depth <= 0 {
         return Color::default();
     }
-    
-    if let Some(rec) = world.hit(r, 0.001, INFINITY) {
-        if let Some((Some(scattered), attenuation)) = rec.material.scatter(r, &rec) {
-            return attenuation * ray_color(&scattered, world, depth - 1);
+    match world.hit(r, 0.001, INFINITY) {
+        Some(rec) => {
+            match rec.material.scatter(r, &rec) {
+                Some((Some(scattered), attenuation)) => {
+                    attenuation * ray_color(&scattered, world, depth -1)
+                }
+                _ => {
+                    Color::default()
+                }
+            }
         }
-        return Color::default();
+        None => {
+            let unit_direction: Vec3 = r.direction.normalize();
+            let t: f64 = 0.5 * (unit_direction.e[1] + 1.0);
+            Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
+        }
     }
-
-    let unit_direction: Vec3 = r.direction.normalize();
-    let t: f64 = 0.5 * (unit_direction.e[1] + 1.0);
-    return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
 fn main() {
@@ -48,7 +53,7 @@ fn main() {
 
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));
-    object_list.push(Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left)));
+    object_list.push(Box::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.45, material_left)));
     object_list.push(Box::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right)));
 
     let world: Box<dyn Hittable> = Box::new(HittableList::new(object_list));

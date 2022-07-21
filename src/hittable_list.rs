@@ -18,9 +18,12 @@ impl Hittable for HittableList {
 		let mut hit_record = None;
 
 		for object in self.objects.iter(){
-			if let Some(rec) = object.hit(r, t_min, closest_so_far) {
-				closest_so_far = rec.t;
-				hit_record = Some(rec);
+			match object.hit(r, t_min, closest_so_far) {
+				Some(rec) => {
+					closest_so_far = rec.t;
+					hit_record = Some(rec);
+				}
+				None => {}
 			}
 		}
 		hit_record

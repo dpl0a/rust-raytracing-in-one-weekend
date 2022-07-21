@@ -58,10 +58,10 @@ impl Material {
                     let refraction_ratio: f64 = if rec.front_face { 1.0 / refraction_index } else { *refraction_index };
                     let unit_direction = r.direction.normalize();
                     let cos_theta: f64 = (-unit_direction).dot(rec.normal).min(1.0);
-                    let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
+                    let sin_theta: f64 = (1.0 - (cos_theta * cos_theta)).sqrt();
                     let cannot_refract: bool = refraction_ratio * sin_theta > 1.0;
 
-                    if cannot_refract || (reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>()) {
+                    if cannot_refract || reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() {
                         let reflected: Vec3 = reflect(unit_direction, rec.normal);
                         let scattered: Ray = Ray::new(rec.p, reflected);
                         Some((Some(scattered), attenuation))
