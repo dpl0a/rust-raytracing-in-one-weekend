@@ -1,44 +1,30 @@
-mod vec3;
-mod color;
-mod ray;
-mod hittable;
-mod hittable_list;
-mod sphere;
-mod camera;
-mod material;
-
 use std::f64::INFINITY;
 use rand::prelude::Rng;
 
-use vec3::{Vec3, Point3};
-use color::{Color, write_color};
-use ray::Ray;
-use hittable::HitRecord;
-use hittable::Hittable;
-use hittable_list::HittableList;
-use sphere::Sphere;
-use camera::Camera;
-use material::Material;
+use ray_tracing_weekend::vec3::{Vec3, Point3};
+use ray_tracing_weekend::color::{Color, write_color};
+use ray_tracing_weekend::ray::Ray;
+use ray_tracing_weekend::hittable::Hittable;
+use ray_tracing_weekend::hittable_list::HittableList;
+use ray_tracing_weekend::sphere::Sphere;
+use ray_tracing_weekend::camera::Camera;
+use ray_tracing_weekend::material::Material;
 
-fn ray_color(r: Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
-    let mut rec: HitRecord = HitRecord::default();
-
+fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     //If we've exceeded the ray bounce limit, no more light is gathered.
     if depth <= 0 {
         return Color::default();
     }
     
-    if world.hit(r, 0.001, INFINITY, &mut rec) {
-        let mut scattered: Ray = Ray::default();
-        let mut attenuation: Color = Color::default();
-        if rec.material().scatter(r, &rec, &mut attenuation, &mut scattered) {
-            return attenuation * ray_color(scattered, world, depth - 1);
+    if let Some(rec) = world.hit(r, 0.001, INFINITY) {
+        if let Some((Some(scattered), attenuation)) = rec.material.scatter(r, &rec) {
+            return attenuation * ray_color(&scattered, world, depth - 1);
         }
         return Color::default();
     }
 
-    let unit_direction: Vec3 = r.direction().normalize();
-    let t: f64 = 0.5 * (unit_direction.y() + 1.0);
+    let unit_direction: Vec3 = r.direction.normalize();
+    let t: f64 = 0.5 * (unit_direction.e[1] + 1.0);
     return Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
@@ -82,14 +68,12 @@ fn main() {
         eprintln!("Scanlines remaining: {} ", i);
         for j in 0..image_width {
             let mut pixel_color: Color = Color::new(0.0, 0.0, 0.0);
-            for s in 0..samples_per_pixel {
-                let rand1: f64 = rng.gen();
-                let rand2: f64 = rng.gen();
-                let u: f64 = ((j as f64) + rand1) / ((image_width - 1) as f64);
-                let v: f64 = ((i as f64) + rand2) / ((image_height - 1) as f64);
+            for _ in 0..samples_per_pixel {
+                let u: f64 = ((j as f64) + rng.gen::<f64>()) / ((image_width - 1) as f64);
+                let v: f64 = ((i as f64) + rng.gen::<f64>()) / ((image_height - 1) as f64);
 
                 let r: Ray = cam.get_ray(u, v);
-                pixel_color = pixel_color + ray_color(r, &world, max_depth);
+                pixel_color = pixel_color + ray_color(&r, &world, max_depth);
             }
             write_color(pixel_color, samples_per_pixel);
         }

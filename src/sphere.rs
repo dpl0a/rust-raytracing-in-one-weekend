@@ -5,43 +5,47 @@ use crate::material::Material;
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct Sphere {
-    center: Point3,
-    radius: f64,
-    material: Material,
+    pub center: Point3,
+    pub radius: f64,
+    pub material: Material,
 }
 
 impl Sphere {
     pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
-        Self { center, radius, material}
+        Self { center, radius, material }
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
-        let oc: Vec3 = r.origin() - self.center;
-        let a: f64 = r.direction().sqlen();
-        let b: f64 = Vec3::dot(oc, r.direction());
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let oc: Vec3 = r.origin - self.center;
+        let a: f64 = r.direction.sqlen();
+        let b: f64 = oc.dot(r.direction);
         let c: f64 = oc.sqlen() - self.radius * self.radius;
-        let discriminant: f64 = b * b - a * c;
-    
-        if discriminant < 0.0 {
-            return false;
-        }
+        let discriminant: f64 = (b * b) - (a * c);
 
-        let sqrtd: f64 = discriminant.sqrt();
-        let mut root: f64 = (-b - sqrtd) / a;
-        if (root < t_min) || (t_max < root) {
-            root = (-b + sqrtd) / a;
-            if (root < t_min) || (t_max < root) {
-                return false;
+        if discriminant >= 0.0 {
+            let sqrtd: f64 = discriminant.sqrt();
+            let root_1: f64 = (-b - sqrtd) / a;
+            let root_2: f64 = (-b + sqrtd) / a;
+
+            for root in [root_1, root_2].iter() {
+                if (*root < t_max) && (*root > t_min) {
+                    let p = r.at(*root);
+                    let normal = (p - self.center) / self.radius;
+                    let front_face = r.direction.dot(normal) < 0.0;
+
+                    return Some(HitRecord {
+                        t: *root,
+                        p: p,
+                        normal: if front_face { normal } else { -normal },
+                        front_face: front_face,
+                        material: &self.material,
+                    });
+                }
+                
             }
         }
-        rec.set_t(root);
-        rec.set_p(r.at(root));
-        let outward_normal: Vec3 = (rec.p() - self.center) / self.radius;
-        rec.set_face_normal(r, outward_normal);
-        rec.set_material(self.material);
-
-        return true;
+        None
     }
 }

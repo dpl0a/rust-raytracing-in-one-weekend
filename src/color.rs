@@ -9,9 +9,9 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
 }
 
 pub fn write_color(pixel_color: Color, samples_per_pixel: i32) {
-    let mut r = pixel_color.r();
-    let mut g = pixel_color.g();
-    let mut b = pixel_color.b();
+    let mut r = pixel_color.e[0];
+    let mut g = pixel_color.e[1];
+    let mut b = pixel_color.e[2];
 
     let scale: f64 = 1.0 / (samples_per_pixel as f64);
     r = 256.0 * clamp((r * scale).sqrt(), 0.0, 0.999);

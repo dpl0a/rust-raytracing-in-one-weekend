@@ -3,7 +3,7 @@ use rand::prelude::Rng;
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct Vec3 {
-    e: [f64; 3],
+    pub e: [f64; 3],
 }
 
 pub type Point3 = Vec3;
@@ -11,30 +11,6 @@ pub type Point3 = Vec3;
 impl Vec3 {
     pub fn new(e0: f64, e1: f64, e2: f64) -> Vec3 {
         Self { e: [e0, e1, e2] }
-    }
-
-    pub fn x(self) -> f64 {
-        self.e[0]
-    }
-
-    pub fn y(self) -> f64 {
-        self.e[1]
-    }
-
-    pub fn z(self) -> f64 {
-        self.e[2]
-    }
-
-    pub fn r(self) -> f64 {
-        self.e[0]
-    }
-
-    pub fn g(self) -> f64 {
-        self.e[1]
-    }
-
-    pub fn b(self) -> f64 {
-        self.e[2]
     }
 
     pub fn sqlen(self) -> f64 {
@@ -45,14 +21,14 @@ impl Vec3 {
         self.sqlen().sqrt()
     }
 
-    pub fn dot(u: Self, v: Self) -> f64 {
-        u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
+    pub fn dot(self, other: Self) -> f64 {
+        self.e[0] * other.e[0] + self.e[1] * other.e[1] + self.e[2] * other.e[2]
     }
 
-    pub fn cross(u: Self, v: Self) -> Self {
-        Self { e: [u.e[1] * v.e[2] - u.e[2] * v.e[1], 
-                   u.e[2] * v.e[0] - u.e[0] * v.e[2], 
-                   u.e[0] * v.e[1] - u.e[1] * v.e[0]] }
+    pub fn cross(self, other: Self) -> Self {
+        Self { e: [self.e[1] * other.e[2] - self.e[2] * other.e[1], 
+                   self.e[2] * other.e[0] - self.e[0] * other.e[2], 
+                   self.e[0] * other.e[1] - self.e[1] * other.e[0]] }
     }
 
     pub fn normalize(self) -> Self {

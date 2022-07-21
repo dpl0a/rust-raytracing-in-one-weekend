@@ -10,6 +10,7 @@ pub struct Camera {
 }
 
 impl Camera {
+    /*
     pub fn new(aspect_ratio: f64, viewport_height: f64, viewport_width: f64, focal_length: f64) -> Self {
         let origin: Point3 = Point3::new(0.0, 0.0, 0.0);
         let horizontal: Vec3 = Vec3::new(viewport_width, 0.0, 0.0);
@@ -18,6 +19,7 @@ impl Camera {
 
         Self { origin: origin, horizontal: horizontal, vertical: vertical, lower_left_corner: lower_left_corner }
     }
+    */
 
     pub fn get_ray(self, u: f64, v: f64) -> Ray {
         Ray::new(self.origin, self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin)

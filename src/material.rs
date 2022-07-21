@@ -1,3 +1,5 @@
+use rand::prelude::Rng;
+
 use crate::vec3::Vec3;
 use crate::ray::Ray;
 use crate::color::Color;
@@ -10,61 +12,67 @@ pub enum Material {
     Dielectric { refraction_index: f64 }
 }
 
-pub fn reflect(u: Vec3, n: Vec3) -> Vec3 {
-    u - n * Vec3::dot(u, n) * 2.0
+fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    v - n * (2.0 * v.dot(n))
 }
 
-pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
-    let cos_theta: f64 = Vec3::dot(-uv, n).min(1.0);
-    let r_out_perp: Vec3 = (uv + n * cos_theta) * etai_over_etat;
-    let r_out_parallel: Vec3 = n * -(1.0 - r_out_perp.sqlen()).abs().sqrt();
-
+fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = ((-uv).dot(n)).min(1.0);
+    let r_out_perp = (uv + n * cos_theta) * etai_over_etat;
+    let r_out_parallel = n * (-1.0 * (1.0 - r_out_perp.sqlen()).abs().sqrt());
     r_out_perp + r_out_parallel
 }
 
+fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
+    let mut r0: f64 = (1.0 - refraction_index) / (1.0 + refraction_index);
+    r0 = r0 * r0;
+    r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
+}
+
 impl Material {
-    pub fn scatter(&self, r_in: Ray, rec: &HitRecord, attenuation: &mut Color, scattered: &mut Ray) -> bool {
-        match self {
-            Self::Lambertian { albedo } => {
-                let mut scatter_direction: Vec3 = rec.normal() + Vec3::random_in_unit_sphere();
-
-                // Catch degenerate scatter direction
-                if scatter_direction.near_zero() {
-                    scatter_direction = rec.normal()
+        pub fn scatter(&self, r: &Ray, rec: &HitRecord) -> Option<(Option<Ray>, Color)> {
+            match self {
+                Self::Lambertian { albedo } => {
+                    let mut scatter_direction: Vec3 = rec.normal + Vec3::random_in_unit_sphere();
+                    if scatter_direction.near_zero() {
+                        scatter_direction = rec.normal;
+                    }
+                    let scattered: Ray = Ray::new(rec.p, scatter_direction);
+                    let attenuation: Color = *albedo;
+                    Some((Some(scattered), attenuation))
                 }
 
-                *scattered = Ray::new(rec.p(), scatter_direction);
-                *attenuation = *albedo;
-                return true;
-            }
-            Self::Metal { albedo, fuzz } => {
-                let reflected: Vec3 = reflect(r_in.direction(), rec.normal());
-                *scattered = Ray::new(rec.p(), reflected + Vec3::random_in_unit_sphere() * *fuzz );
-                *attenuation = *albedo;
-                Vec3::dot(scattered.direction(), rec.normal()) > 0.0
-            }
-            Self::Dielectric { refraction_index } => {
-                *attenuation = Color::new(1.0, 1.0, 1.0);
-                let refraction_ratio = if rec.front_face() { *refraction_index } else { 1.0 / refraction_index };
-
-                let unit_direction: Vec3 = r_in.direction().normalize();
-                let cos_theta: f64 = Vec3::dot(-unit_direction, rec.normal()).min(1.0); 
-                let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
-
-                let cannot_refract: bool = refraction_ratio * sin_theta > 1.0;
-                let mut direction: Vec3 = Vec3::default();
-
-                if cannot_refract {
-                    direction = reflect(unit_direction, rec.normal())
-                } else {
-                    direction = refract(unit_direction, rec.normal(), refraction_ratio)
+                Self::Metal { albedo, fuzz } => {
+                    let reflected: Vec3 = reflect(r.direction, rec.normal);
+                    let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere() * *fuzz);
+                    let attenuation: Color = *albedo;
+                    if scattered.direction.dot(rec.normal) > 0.0 {
+                        return Some((Some(scattered), attenuation));
+                    }
+                    None
                 }
 
-                *scattered = Ray::new(rec.p(), direction);
-                return true;
+                Self::Dielectric { refraction_index } => {
+                    let mut rng = rand::thread_rng();
+                    let attenuation: Color = Color::new(1.0, 1.0, 1.0);
+                    let refraction_ratio: f64 = if rec.front_face { 1.0 / refraction_index } else { *refraction_index };
+                    let unit_direction = r.direction.normalize();
+                    let cos_theta: f64 = (-unit_direction).dot(rec.normal).min(1.0);
+                    let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
+                    let cannot_refract: bool = refraction_ratio * sin_theta > 1.0;
+
+                    if cannot_refract || (reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>()) {
+                        let reflected: Vec3 = reflect(unit_direction, rec.normal);
+                        let scattered: Ray = Ray::new(rec.p, reflected);
+                        Some((Some(scattered), attenuation))
+                    } else {
+                        let direction: Vec3 = refract(unit_direction, rec.normal, refraction_ratio);
+                        let scattered: Ray = Ray::new(rec.p, direction);
+                        Some((Some(scattered), attenuation))
+                    }
+                }
             }
         }
-    }
 
     pub fn new_lambertian(albedo: Color) -> Material {
         Self::Lambertian { albedo: albedo }
