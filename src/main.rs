@@ -1,5 +1,6 @@
 use std::f64::INFINITY;
 use rand::prelude::Rng;
+use std::time::Instant;
 
 use ray_tracing_weekend::vec3::{Vec3, Point3};
 use ray_tracing_weekend::color::{Color, write_color};
@@ -34,6 +35,8 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
 }
 
 fn main() {
+    let start = Instant::now();
+
     // Image
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: i32 = 400;
@@ -84,5 +87,5 @@ fn main() {
         }
     }
 
-    eprintln!("Done!");
+    eprintln!("Fatto! Hai perso {} secondi della tua vita", start.elapsed().as_secs());
 }
