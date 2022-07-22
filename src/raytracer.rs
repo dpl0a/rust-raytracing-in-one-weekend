@@ -5,10 +5,14 @@ use image::codecs::png::PngEncoder;
 use image::ColorType;
 use image::ImageEncoder;
 
+use rand_xoshiro::rand_core::SeedableRng;
+use rand_xoshiro::Xoroshiro128Plus;
+
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
 use crate::vec3::{Vec3, Color};
+use crate::PRNG;
 
 fn write_image(filename: &str, pixels: &[u8],
 	       image_width: usize, image_height: usize) -> Result<(), std::io::Error> {
@@ -24,15 +28,15 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
     return x;
 }
 
-fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
+fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32, rng: &mut PRNG) -> Color {
     if depth <= 0 {
         return Color::default();
     }
     match world.hit(r, 0.001, std::f64::INFINITY) {
         Some(rec) => {
-            match rec.material.scatter(r, &rec) {
+            match rec.material.scatter(r, &rec, rng) {
                 Some((scattered, attenuation)) => {
-                    attenuation * ray_color(&scattered, world, depth - 1)
+                    attenuation * ray_color(&scattered, world, depth - 1, rng)
                 }
                 _ => {
                     Color::default()
@@ -53,15 +57,16 @@ fn render_line(pixels: &mut [u8],
                samples_per_pixel: i32, 
                max_depth: i32, 
                y: usize) {
-    let mut rng = rand::thread_rng();
+    let mut rng = Xoroshiro128Plus::seed_from_u64(y as u64);
+    //let mut rng = rand::thread_rng();
 
     for x in 0..image_width {
         let mut pixel_color: Color = Color::default();
         for _ in 0..samples_per_pixel {
             let u: f64 = ((x as f64) + rng.gen::<f64>()) / ((image_width - 1) as f64);
             let v: f64 = (image_height as f64 - ((y as f64) + rng.gen::<f64>())) / ((image_height - 1) as f64);
-            let r: Ray = camera.get_ray(u, v);
-            pixel_color = pixel_color + ray_color(&r, &world, max_depth);
+            let r: Ray = camera.get_ray(u, v, &mut rng);
+            pixel_color = pixel_color + ray_color(&r, &world, max_depth, &mut rng);
         }
         let scale: f64 = 1.0 / (samples_per_pixel as f64);
         let r: f64 = (scale * pixel_color.x).sqrt();

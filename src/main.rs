@@ -54,6 +54,26 @@ fn random_scene() -> HittableList {
     return world;
 }
 
+fn test_scene() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+
+    let ground_material: Material = Material::new_lambertian(Color::new(0.5, 0.5, 0.5));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material)));
+
+    let material1 : Material = Material::new_dielectric(1.5);
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), -0.95, material1)));
+
+    let material2 : Material = Material::new_lambertian(Color::new(0.4, 0.2, 0.1));
+    object_list.push(Box::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2)));
+
+    let material3 : Material = Material::new_metal(Color::new(0.7, 0.6, 0.5), 0.0);
+    object_list.push(Box::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material3)));
+
+    let world = HittableList::new(object_list);
+    return world;
+}
+
 fn main() {
     let start = Instant::now();
 
@@ -66,6 +86,8 @@ fn main() {
 
     // World
     let world: Box<dyn Hittable> = Box::new(random_scene());
+    //let world: Box<dyn Hittable> = Box::new(test_scene());
+
 
     // Camera
     let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);

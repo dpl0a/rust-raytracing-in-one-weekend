@@ -1,5 +1,6 @@
 use crate::vec3::{Vec3, Point3};
 use crate::ray::Ray;
+use crate::PRNG;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Camera {
@@ -45,8 +46,8 @@ impl Camera {
              }
     }
 
-    pub fn get_ray(self, s: f64, t: f64) -> Ray {
-        let rd: Vec3 = Vec3::random_in_unit_disk() * self.lens_radius;
+    pub fn get_ray(self, s: f64, t: f64, rng: &mut PRNG) -> Ray {
+        let rd: Vec3 = Vec3::random_in_unit_disk(rng) * self.lens_radius;
         let offset: Vec3 = self.u * rd.x + self.v * rd.y;
         Ray::new(self.origin + offset, 
                  self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset)
