@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use rand::prelude::Rng;
 use std::cmp::PartialEq;
+use crate::PRNG;
 
 #[cfg(test)]
 use assert_approx_eq::assert_approx_eq;
@@ -48,8 +49,8 @@ impl Vec3 {
         Self { x: rng.gen_range(min..max), y: rng.gen_range(min..max), z: rng.gen_range(min..max) }
     }
 
-    pub fn random_in_unit_sphere() -> Self {
-        let mut rng = rand::thread_rng();
+    pub fn random_in_unit_sphere(rng: &mut PRNG) -> Self {
+        //let mut rng = rand::thread_rng();
         loop {
             let p: Vec3 = Self { x: rng.gen_range(-1.0..1.0), y: rng.gen_range(-1.0..1.0), z: rng.gen_range(-1.0..1.0) };
             if p.sqlen() >= 1.0 {
@@ -59,8 +60,8 @@ impl Vec3 {
         }
     }
 
-    pub fn random_in_unit_disk() -> Self {
-        let mut rng = rand::thread_rng();
+    pub fn random_in_unit_disk(rng: &mut PRNG) -> Self {
+        //let mut rng = rand::thread_rng();
         loop {
             let p: Vec3 = Self { x: rng.gen_range(-1.0..1.0), y: rng.gen_range(-1.0..1.0), z: 0.0 };
             if p.sqlen() >= 1.0 {

@@ -3,6 +3,7 @@ use rand::prelude::Rng;
 use crate::vec3::{Vec3, Color};
 use crate::ray::Ray;
 use crate::hittable::HitRecord;
+use crate::PRNG;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
@@ -29,10 +30,10 @@ fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
 }
 
 impl Material {
-        pub fn scatter(&self, r: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
+        pub fn scatter(&self, r: &Ray, rec: &HitRecord, rng: &mut PRNG) -> Option<(Ray, Color)> {
             match self {
                 Self::Lambertian { albedo } => {
-                    let mut scatter_direction: Vec3 = rec.normal + Vec3::random_in_unit_sphere();
+                    let mut scatter_direction: Vec3 = rec.normal + Vec3::random_in_unit_sphere(rng);
                     if scatter_direction.near_zero() {
                         scatter_direction = rec.normal;
                     }
@@ -42,7 +43,7 @@ impl Material {
                 }
                 Self::Metal { albedo, fuzz } => {
                     let reflected: Vec3 = reflect(r.direction, rec.normal);
-                    let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere() * *fuzz);
+                    let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere(rng) * *fuzz);
                     let attenuation: Color = *albedo;
                     if scattered.direction.dot(rec.normal) > 0.0 {
                         return Some((scattered, attenuation));
@@ -50,7 +51,7 @@ impl Material {
                     None
                 }
                 Self::Dielectric { refraction_index } => {
-                    let mut rng = rand::thread_rng();
+                    //let mut rng = rand::thread_rng();
                     let attenuation: Color = Color::new(1.0, 1.0, 1.0);
                     let refraction_ratio: f64 = if rec.front_face { 1.0 / refraction_index } else { *refraction_index };
                     let unit_direction = r.direction.normalize();
