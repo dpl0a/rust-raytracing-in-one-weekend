@@ -19,7 +19,7 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     match world.hit(r, 0.001, std::f64::INFINITY) {
         Some(rec) => {
             match rec.material.scatter(r, &rec) {
-                Some((Some(scattered), attenuation)) => {
+                Some((scattered, attenuation)) => {
                     attenuation * ray_color(&scattered, world, depth - 1)
                 }
                 _ => {
