@@ -1,10 +1,22 @@
 use rand::Rng;
 use rayon::prelude::*;
+use std::fs::File;
+use image::codecs::png::PngEncoder;
+use image::ColorType;
+use image::ImageEncoder;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
 use crate::vec3::{Vec3, Color};
+
+fn write_image(filename: &str, pixels: &[u8],
+	       image_width: usize, image_height: usize) -> Result<(), std::io::Error> {
+    let output = File::create(filename)?;
+    let encoder = PngEncoder::new(output);
+    encoder.write_image(pixels, image_width as u32, image_height as u32, ColorType::Rgb8).expect("error writing image: PngEncoder::write_image error");
+    Ok(())
+}
 
 fn clamp(x: f64, min: f64, max: f64) -> f64 {
     if x < min { return min; }
@@ -35,7 +47,7 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32) -> Color {
     }
 }
 
-fn render_line(pixels: &mut [(u8, u8, u8)], 
+fn render_line(pixels: &mut [u8], 
                camera: Camera, world: &Box<dyn Hittable>, 
                image_width: usize, image_height: usize, 
                samples_per_pixel: i32, 
@@ -47,7 +59,7 @@ fn render_line(pixels: &mut [(u8, u8, u8)],
         let mut pixel_color: Color = Color::default();
         for _ in 0..samples_per_pixel {
             let u: f64 = ((x as f64) + rng.gen::<f64>()) / ((image_width - 1) as f64);
-            let v: f64 = ((y as f64) + rng.gen::<f64>()) / ((image_height - 1) as f64);
+            let v: f64 = (image_height as f64 - ((y as f64) + rng.gen::<f64>())) / ((image_height - 1) as f64);
             let r: Ray = camera.get_ray(u, v);
             pixel_color = pixel_color + ray_color(&r, &world, max_depth);
         }
@@ -56,7 +68,10 @@ fn render_line(pixels: &mut [(u8, u8, u8)],
         let g: f64 = (scale * pixel_color.y).sqrt();
         let b: f64 = (scale * pixel_color.z).sqrt();
 
-        pixels[x] = ((256.0 * clamp(r, 0.0, 0.999)) as u8, (256.0 * clamp(g, 0.0, 0.999)) as u8, (256.0 * clamp(b, 0.0, 0.999)) as u8);
+        pixels[x * 3]     = (256.0 * clamp(r, 0.0, 0.999)) as u8;
+        pixels[x * 3 + 1] = (256.0 * clamp(g, 0.0, 0.999)) as u8;
+        pixels[x * 3 + 2] = (256.0 * clamp(b, 0.0, 0.999)) as u8;	
+
     }
 }
 
@@ -64,17 +79,14 @@ pub fn render(camera: Camera, world: &Box<dyn Hittable>,
     image_width: usize, image_height: usize, 
     samples_per_pixel: i32, 
     max_depth: i32) {
-        let mut pixels = vec![(0, 0, 0); image_width * image_height];
-        let bands: Vec<(usize, &mut [(u8, u8, u8)])> = pixels.chunks_mut(image_width).enumerate().collect();
+        let mut pixels = vec![0; image_width * image_height * 3];
+        let bands: Vec<(usize, &mut [u8])> = pixels.chunks_mut(image_width * 3).enumerate().collect();
 
         bands.into_par_iter().for_each(|(i, band)| {
             render_line(band, camera, world, image_width, image_height, samples_per_pixel, max_depth, i);
             eprintln!("Line {} Rendered!", i);
         });
 
-        for chunk in pixels.chunks(image_width).rev() {
-            for p in chunk {
-                println!("{} {} {}", p.0, p.1, p.2);
-            }
-        }
+        write_image("./prova.png", &pixels, image_width, image_height).expect("error writing image: std::io::Error");
+
 }  
