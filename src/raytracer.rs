@@ -1,11 +1,10 @@
-use std::time::Instant;
 use rand::Rng;
 use rayon::prelude::*;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
-use crate::vec3::{Vec3, Point3, Color};
+use crate::vec3::{Vec3, Color};
 
 fn clamp(x: f64, min: f64, max: f64) -> f64 {
     if x < min { return min; }

@@ -57,10 +57,10 @@ fn main() {
     let start = Instant::now();
 
     // Image
-    let aspect_ratio: f64 = 4.0 / 3.0;
-    let image_width: usize = 400;
+    let aspect_ratio: f64 = 3.0 / 2.0;
+    let image_width: usize = 1200;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
-    let samples_per_pixel: i32 = 100;
+    let samples_per_pixel: i32 = 500;
     let max_depth: i32 = 50;
 
     // World
