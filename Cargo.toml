@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 rand = "0.8"
 assert_approx_eq = "1.1.0"
+rayon = "1.5.3"

@@ -1,8 +1,7 @@
 use rand::prelude::Rng;
 
-use crate::vec3::Vec3;
+use crate::vec3::{Vec3, Color};
 use crate::ray::Ray;
-use crate::color::Color;
 use crate::hittable::HitRecord;
 
 #[derive(Debug, Copy, Clone)]
