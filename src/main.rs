@@ -42,6 +42,7 @@ fn random_scene() -> HittableList {
 
     let material1 : Material = Material::new_dielectric(1.5);
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), -0.95, material1)));
 
     let material2 : Material = Material::new_lambertian(Color::new(0.4, 0.2, 0.1));
     object_list.push(Box::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2)));
@@ -58,9 +59,9 @@ fn main() {
 
     // Image
     let aspect_ratio: f64 = 3.0 / 2.0;
-    let image_width: usize = 1200;
+    let image_width: usize = 400;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
-    let samples_per_pixel: i32 = 500;
+    let samples_per_pixel: i32 = 100;
     let max_depth: i32 = 50;
 
     // World

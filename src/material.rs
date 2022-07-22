@@ -29,7 +29,7 @@ fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
 }
 
 impl Material {
-        pub fn scatter(&self, r: &Ray, rec: &HitRecord) -> Option<(Option<Ray>, Color)> {
+        pub fn scatter(&self, r: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
             match self {
                 Self::Lambertian { albedo } => {
                     let mut scatter_direction: Vec3 = rec.normal + Vec3::random_in_unit_sphere();
@@ -38,14 +38,14 @@ impl Material {
                     }
                     let scattered: Ray = Ray::new(rec.p, scatter_direction);
                     let attenuation: Color = *albedo;
-                    Some((Some(scattered), attenuation))
+                    Some((scattered, attenuation))
                 }
                 Self::Metal { albedo, fuzz } => {
                     let reflected: Vec3 = reflect(r.direction, rec.normal);
                     let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere() * *fuzz);
                     let attenuation: Color = *albedo;
                     if scattered.direction.dot(rec.normal) > 0.0 {
-                        return Some((Some(scattered), attenuation));
+                        return Some((scattered, attenuation));
                     }
                     None
                 }
@@ -61,11 +61,11 @@ impl Material {
                     if cannot_refract || reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() {
                         let reflected: Vec3 = reflect(unit_direction, rec.normal);
                         let scattered: Ray = Ray::new(rec.p, reflected);
-                        Some((Some(scattered), attenuation))
+                        Some((scattered, attenuation))
                     } else {
                         let direction: Vec3 = refract(unit_direction, rec.normal, refraction_ratio);
                         let scattered: Ray = Ray::new(rec.p, direction);
-                        Some((Some(scattered), attenuation))
+                        Some((scattered, attenuation))
                     }
                 }
             }
