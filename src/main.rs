@@ -1,5 +1,6 @@
 use rand::prelude::Rng;
 use std::time::Instant;
+use std::env;
 
 use ray_tracing_weekend::vec3::{Vec3, Point3, Color};
 use ray_tracing_weekend::hittable::Hittable;
@@ -77,6 +78,14 @@ fn test_scene() -> HittableList {
 fn main() {
     let start = Instant::now();
 
+    // read output filename
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        println!("Usage: {} <output_file.png>", args[0]);
+        return;
+    }
+    let filename: &str = &args[1];
+
     // Image
     let aspect_ratio: f64 = 3.0 / 2.0;
     let image_width: usize = 400;
@@ -85,9 +94,8 @@ fn main() {
     let max_depth: i32 = 50;
 
     // World
-    let world: Box<dyn Hittable> = Box::new(random_scene());
-    //let world: Box<dyn Hittable> = Box::new(test_scene());
-
+    // let world: Box<dyn Hittable> = Box::new(random_scene());
+    let world: Box<dyn Hittable> = Box::new(test_scene());
 
     // Camera
     let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);
@@ -97,7 +105,7 @@ fn main() {
     let aperture: f64 = 0.1;
     let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
-    render(cam, &world, image_width, image_height, samples_per_pixel, max_depth);
+    render(filename, cam, &world, image_width, image_height, samples_per_pixel, max_depth);
 
     eprintln!("Fatto! Hai perso {} secondi della tua vita", start.elapsed().as_secs());
 }

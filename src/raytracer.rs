@@ -75,12 +75,11 @@ fn render_line(pixels: &mut [u8],
 
         pixels[x * 3]     = (256.0 * clamp(r, 0.0, 0.999)) as u8;
         pixels[x * 3 + 1] = (256.0 * clamp(g, 0.0, 0.999)) as u8;
-        pixels[x * 3 + 2] = (256.0 * clamp(b, 0.0, 0.999)) as u8;	
-
+        pixels[x * 3 + 2] = (256.0 * clamp(b, 0.0, 0.999)) as u8;
     }
 }
 
-pub fn render(camera: Camera, world: &Box<dyn Hittable>, 
+pub fn render(filename: &str, camera: Camera, world: &Box<dyn Hittable>, 
     image_width: usize, image_height: usize, 
     samples_per_pixel: i32, 
     max_depth: i32) {
@@ -92,6 +91,6 @@ pub fn render(camera: Camera, world: &Box<dyn Hittable>,
             eprintln!("Line {} Rendered!", i);
         });
 
-        write_image("./prova.png", &pixels, image_width, image_height).expect("error writing image: std::io::Error");
+        write_image(filename, &pixels, image_width, image_height).expect("error writing image: std::io::Error");
 
 }  
