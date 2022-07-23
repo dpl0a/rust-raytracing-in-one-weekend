@@ -14,8 +14,10 @@ use crate::ray::Ray;
 use crate::vec3::{Vec3, Color};
 use crate::PRNG;
 
-fn write_image(filename: &str, pixels: &[u8],
-	       image_width: usize, image_height: usize) -> Result<(), std::io::Error> {
+fn write_image(filename: &str, 
+               pixels: &[u8],
+	           image_width: usize, 
+               image_height: usize) -> Result<(), std::io::Error> {
     let output = File::create(filename)?;
     let encoder = PngEncoder::new(output);
     encoder.write_image(pixels, image_width as u32, image_height as u32, ColorType::Rgb8).expect("error writing image: PngEncoder::write_image error");
@@ -57,8 +59,8 @@ fn render_line(pixels: &mut [u8],
                samples_per_pixel: i32, 
                max_depth: i32, 
                y: usize) {
-    let mut rng = Xoroshiro128Plus::seed_from_u64(y as u64);
-    //let mut rng = rand::thread_rng();
+
+    let mut rng = Xoroshiro128Plus::from_entropy();
 
     for x in 0..image_width {
         let mut pixel_color: Color = Color::default();
@@ -79,18 +81,20 @@ fn render_line(pixels: &mut [u8],
     }
 }
 
-pub fn render(filename: &str, camera: Camera, world: &Box<dyn Hittable>, 
-    image_width: usize, image_height: usize, 
-    samples_per_pixel: i32, 
-    max_depth: i32) {
-        let mut pixels = vec![0; image_width * image_height * 3];
-        let bands: Vec<(usize, &mut [u8])> = pixels.chunks_mut(image_width * 3).enumerate().collect();
+pub fn render(filename: &str, 
+              camera: Camera, 
+              world: &Box<dyn Hittable>, 
+              image_width: usize, 
+              image_height: usize, 
+              samples_per_pixel: i32, 
+              max_depth: i32) {
+    let mut pixels = vec![0; image_width * image_height * 3];
+    let bands: Vec<(usize, &mut [u8])> = pixels.chunks_mut(image_width * 3).enumerate().collect();
 
-        bands.into_par_iter().for_each(|(i, band)| {
-            render_line(band, camera, world, image_width, image_height, samples_per_pixel, max_depth, i);
-            eprintln!("Line {} Rendered!", i);
-        });
-
-        write_image(filename, &pixels, image_width, image_height).expect("error writing image: std::io::Error");
+    bands.into_par_iter().for_each(|(i, band)| {
+        render_line(band, camera, world, image_width, image_height, samples_per_pixel, max_depth, i);
+        eprintln!("Line {} Rendered!", i);
+    });
+    write_image(filename, &pixels, image_width, image_height).expect("error writing image: std::io::Error");
 
 }  

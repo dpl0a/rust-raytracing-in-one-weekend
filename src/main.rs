@@ -1,6 +1,8 @@
 use rand::prelude::Rng;
 use std::time::Instant;
 use std::env;
+use rand_xoshiro::rand_core::SeedableRng;
+use rand_xoshiro::Xoroshiro128Plus;
 
 use ray_tracing_weekend::vec3::{Vec3, Point3, Color};
 use ray_tracing_weekend::hittable::Hittable;
@@ -16,7 +18,7 @@ fn random_scene() -> HittableList {
     let ground_material: Material = Material::new_lambertian(Color::new(0.5, 0.5, 0.5));
     object_list.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material)));
 
-    let mut rng = rand::thread_rng();
+    let mut rng = Xoroshiro128Plus::from_entropy();
 
     for a in -11..11 {
         for b in -11..11 {
@@ -55,30 +57,10 @@ fn random_scene() -> HittableList {
     return world;
 }
 
-fn test_scene() -> HittableList {
-    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
-
-    let ground_material: Material = Material::new_lambertian(Color::new(0.5, 0.5, 0.5));
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material)));
-
-    let material1 : Material = Material::new_dielectric(1.5);
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1)));
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), -0.95, material1)));
-
-    let material2 : Material = Material::new_lambertian(Color::new(0.4, 0.2, 0.1));
-    object_list.push(Box::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2)));
-
-    let material3 : Material = Material::new_metal(Color::new(0.7, 0.6, 0.5), 0.0);
-    object_list.push(Box::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material3)));
-
-    let world = HittableList::new(object_list);
-    return world;
-}
-
 fn main() {
     let start = Instant::now();
 
-    // read output filename
+    // Read output filename
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         println!("Usage: {} <output_file.png>", args[0]);
@@ -87,15 +69,15 @@ fn main() {
     let filename: &str = &args[1];
 
     // Image
-    let aspect_ratio: f64 = 3.0 / 2.0;
+    let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: usize = 400;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
     let samples_per_pixel: i32 = 100;
     let max_depth: i32 = 50;
 
     // World
-    // let world: Box<dyn Hittable> = Box::new(random_scene());
-    let world: Box<dyn Hittable> = Box::new(test_scene());
+    let world: Box<dyn Hittable> = Box::new(random_scene());
+    //let world: Box<dyn Hittable> = Box::new(test_scene());
 
     // Camera
     let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);
