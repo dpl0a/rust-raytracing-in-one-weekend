@@ -37,13 +37,13 @@ impl Material {
                     if scatter_direction.near_zero() {
                         scatter_direction = rec.normal;
                     }
-                    let scattered: Ray = Ray::new(rec.p, scatter_direction);
+                    let scattered: Ray = Ray::new(rec.p, scatter_direction, r.time);
                     let attenuation: Color = *albedo;
                     Some((scattered, attenuation))
                 }
                 Self::Metal { albedo, fuzz } => {
                     let reflected: Vec3 = reflect(r.direction, rec.normal);
-                    let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere(rng) * *fuzz);
+                    let scattered: Ray = Ray::new(rec.p, reflected + Vec3::random_in_unit_sphere(rng) * *fuzz, r.time);
                     let attenuation: Color = *albedo;
                     if scattered.direction.dot(rec.normal) > 0.0 {
                         return Some((scattered, attenuation));
@@ -61,11 +61,11 @@ impl Material {
 
                     if cannot_refract || reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() {
                         let reflected: Vec3 = reflect(unit_direction, rec.normal);
-                        let scattered: Ray = Ray::new(rec.p, reflected);
+                        let scattered: Ray = Ray::new(rec.p, reflected, r.time);
                         Some((scattered, attenuation))
                     } else {
                         let direction: Vec3 = refract(unit_direction, rec.normal, refraction_ratio);
-                        let scattered: Ray = Ray::new(rec.p, direction);
+                        let scattered: Ray = Ray::new(rec.p, direction, r.time);
                         Some((scattered, attenuation))
                     }
                 }

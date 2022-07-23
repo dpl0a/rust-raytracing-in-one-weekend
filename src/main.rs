@@ -10,9 +10,11 @@ use ray_tracing_weekend::hittable_list::HittableList;
 use ray_tracing_weekend::sphere::Sphere;
 use ray_tracing_weekend::camera::Camera;
 use ray_tracing_weekend::material::Material;
-use ray_tracing_weekend::raytracer::*;
+use ray_tracing_weekend::raytracer::render;
+use ray_tracing_weekend::moving_sphere::MovingSphere;
 
-fn random_scene() -> HittableList {
+/*
+fn random_scene_static() -> HittableList {
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
 
     let ground_material: Material = Material::new_lambertian(Color::new(0.5, 0.5, 0.5));
@@ -55,6 +57,51 @@ fn random_scene() -> HittableList {
 
     let world = HittableList::new(object_list);
     return world;
+} */
+
+fn random_scene() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+
+    let ground_material: Material = Material::new_lambertian(Color::new(0.5, 0.5, 0.5));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material)));
+
+    let mut rng = Xoroshiro128Plus::from_entropy();
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat: f64 = rng.gen();
+            let center: Point3 = Point3::new((a as f64) + 0.9 * rng.gen::<f64>(), 0.2, (b as f64) + 0.9 * rng.gen::<f64>());
+
+            if (center - Point3::new(4.0, 0.2, 0.0)).len() > 0.9 {
+                if choose_mat < 0.8 {
+                    let albedo: Color = Color::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>());
+                    let sphere_material: Material = Material::new_lambertian(albedo);
+                    let center2: Point3 = center + Point3::new(0.0, rng.gen_range(0.0..0.5), 0.0);
+                    object_list.push(Box::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, sphere_material)));
+                } else if choose_mat < 0.95 {
+                    let albedo: Color = Color::random(0.5, 1.0);
+                    let fuzz: f64 = rng.gen_range(0.0..0.5);
+                    let sphere_material: Material = Material::new_metal(albedo, fuzz);
+                    object_list.push(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                } else {
+                    let sphere_material: Material = Material::new_dielectric(1.5);
+                    object_list.push(Box::new(Sphere::new(center, 0.2, sphere_material)));
+                }
+            }
+        }
+    }
+
+    let material1 : Material = Material::new_dielectric(1.5);
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1)));
+
+    let material2 : Material = Material::new_lambertian(Color::new(0.4, 0.2, 0.1));
+    object_list.push(Box::new(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2)));
+
+    let material3 : Material = Material::new_metal(Color::new(0.7, 0.6, 0.5), 0.0);
+    object_list.push(Box::new(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material3)));
+
+    let world = HittableList::new(object_list);
+    return world;
 }
 
 fn main() {
@@ -85,7 +132,7 @@ fn main() {
     let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus: f64 = 10.0;
     let aperture: f64 = 0.1;
-    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
     render(filename, cam, &world, image_width, image_height, samples_per_pixel, max_depth);
 

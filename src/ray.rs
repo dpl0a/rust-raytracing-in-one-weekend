@@ -4,14 +4,15 @@ use crate::vec3::{Vec3, Point3};
 pub struct Ray {
     pub origin: Point3,
     pub direction: Vec3,
+    pub time: f64,
 }
 
 #[cfg(test)]
 use assert_approx_eq::assert_approx_eq;
 
 impl Ray {
-    pub fn new(o: Vec3, d: Vec3) -> Self {
-        Ray {origin: o, direction: d}
+    pub fn new(o: Vec3, d: Vec3, t: f64) -> Self {
+        Ray { origin: o, direction: d, time: t }
     }
 
     pub fn at(&self, t: f64) -> Vec3 {
@@ -24,7 +25,7 @@ fn test_ray() {
     let p = Vec3::new(0.1, 0.2, 0.3);
     let q = Vec3::new(0.2, 0.3, 0.4);
 
-    let r = Ray::new(p, q);
+    let r = Ray::new(p, q, 1.0);
 
     assert_approx_eq!(r.origin.x, 0.1);
     assert_approx_eq!(r.origin.y, 0.2);
@@ -39,7 +40,7 @@ fn test_ray_at() {
     let p = Vec3::new(0.0, 0.0, 0.0);
     let q = Vec3::new(1.0, 2.0, 3.0);
 
-    let r = Ray::new(p, q);
+    let r = Ray::new(p, q, 1.0);
     let s = r.at(0.5);
 
     assert_approx_eq!(s.x, 0.5);
