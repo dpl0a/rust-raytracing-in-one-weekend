@@ -7,6 +7,5 @@ pub mod camera;
 pub mod material;
 pub mod raytracer;
 pub mod moving_sphere;
-pub mod aabb;
 
 pub type PRNG = rand_xoshiro::Xoroshiro128Plus;

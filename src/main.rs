@@ -12,7 +12,6 @@ use ray_tracing_weekend::camera::Camera;
 use ray_tracing_weekend::material::Material;
 use ray_tracing_weekend::raytracer::render;
 use ray_tracing_weekend::moving_sphere::MovingSphere;
-use ray_tracing_weekend::aabb::*;
 
 fn random_scene(complex: bool, bounce: bool) -> HittableList {
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
