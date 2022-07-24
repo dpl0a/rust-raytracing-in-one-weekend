@@ -96,3 +96,17 @@ pub fn two_spheres_cam(aspect_ratio: f64) -> Camera {
 
     Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0)
 }
+
+// ---
+// Two spheres, one is checkered, one is a light
+pub fn light_test() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+    let checker: Material = Material::new_textured(Texture::new_checker(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
+    let light: Material = Material::new_light(Color::new(1.0, 1.0, 1.0));
+
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -10.0, 0.0), 10.0, checker)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 10.0, 0.0), 8.0, light)));
+
+    let world = HittableList::new(object_list);
+    return world;
+}

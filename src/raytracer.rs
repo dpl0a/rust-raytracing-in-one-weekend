@@ -30,7 +30,7 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
     return x;
 }
 
-fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32, rng: &mut PRNG) -> Color {
+fn ray_color(r: &Ray, background: Color, world: &Box<dyn Hittable>, depth: i32, rng: &mut PRNG) -> Color {
     if depth <= 0 {
         return Color::default();
     }
@@ -38,23 +38,22 @@ fn ray_color(r: &Ray, world: &Box<dyn Hittable>, depth: i32, rng: &mut PRNG) -> 
         Some(rec) => {
             match rec.material.scatter(r, &rec, rng) {
                 Some((scattered, attenuation)) => {
-                    attenuation * ray_color(&scattered, world, depth - 1, rng)
+                    attenuation * ray_color(&scattered, background, world, depth - 1, rng)
                 }
                 _ => {
-                    Color::default()
+                    rec.material.emitted(rec.u, rec.v, rec.p)
                 }
             }
         }
         None => {
-            let unit_direction: Vec3 = r.direction.normalize();
-            let t: f64 = 0.5 * (unit_direction.y + 1.0);
-            Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
+            background
         }
     }
 }
 
-fn render_line(pixels: &mut [u8], 
-               camera: Camera, world: &Box<dyn Hittable>, 
+fn render_line(pixels: &mut [u8], camera: Camera, 
+               world: &Box<dyn Hittable>, 
+               background: Color,
                image_width: usize, image_height: usize, 
                samples_per_pixel: i32, 
                max_depth: i32, 
@@ -68,7 +67,7 @@ fn render_line(pixels: &mut [u8],
             let u: f64 = ((x as f64) + rng.gen::<f64>()) / ((image_width - 1) as f64);
             let v: f64 = (image_height as f64 - ((y as f64) + rng.gen::<f64>())) / ((image_height - 1) as f64);
             let r: Ray = camera.get_ray(u, v, &mut rng);
-            pixel_color = pixel_color + ray_color(&r, &world, max_depth, &mut rng);
+            pixel_color = pixel_color + ray_color(&r, background, &world, max_depth, &mut rng);
         }
         let scale: f64 = 1.0 / (samples_per_pixel as f64);
         let r: f64 = (scale * pixel_color.x).sqrt();
@@ -84,6 +83,7 @@ fn render_line(pixels: &mut [u8],
 pub fn render(filename: &str, 
               camera: Camera, 
               world: &Box<dyn Hittable>, 
+              background: Color,
               image_width: usize, 
               image_height: usize, 
               samples_per_pixel: i32, 
@@ -92,7 +92,7 @@ pub fn render(filename: &str,
     let bands: Vec<(usize, &mut [u8])> = pixels.chunks_mut(image_width * 3).enumerate().collect();
 
     bands.into_par_iter().for_each(|(i, band)| {
-        render_line(band, camera, world, image_width, image_height, samples_per_pixel, max_depth, i);
+        render_line(band, camera, world, background, image_width, image_height, samples_per_pixel, max_depth, i);
         eprintln!("Line {} Rendered!", i);
     });
     write_image(filename, &pixels, image_width, image_height).expect("error writing image: std::io::Error");
