@@ -2,14 +2,17 @@ use rand::prelude::Rng;
 use rand_xoshiro::rand_core::SeedableRng;
 use rand_xoshiro::Xoroshiro128Plus;
 
-use crate::vec3::{Point3, Color};
+use crate::vec3::{Vec3, Point3, Color};
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::sphere::Sphere;
 use crate::material::Material;
 use crate::moving_sphere::MovingSphere;
-use crate::texture::*;
+use crate::texture::Texture;
+use crate::camera::Camera;
 
+
+// Random scene from the end of book 1 (+ bounce and checkered ground)
 pub fn random_scene(bounce: bool) -> HittableList {
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
 
@@ -58,4 +61,38 @@ pub fn random_scene(bounce: bool) -> HittableList {
 
     let world = HittableList::new(object_list);
     return world;
+}
+
+pub fn random_scene_cam(aspect_ratio: f64) -> Camera {
+    let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);
+    let lookat: Point3 = Point3::new(0.0, 0.0, 0.0);
+    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus: f64 = 10.0;
+    let aperture: f64 = 0.1;
+
+    Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0)
+}
+
+// ----
+
+// Two checkered spheres
+pub fn two_spheres() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+    let checker: Material = Material::new_textured(Texture::new_checker(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
+
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -10.0, 0.0), 10.0, checker)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 10.0, 0.0), 10.0, checker)));
+
+    let world = HittableList::new(object_list);
+    return world;
+}
+
+pub fn two_spheres_cam(aspect_ratio: f64) -> Camera {
+    let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);
+    let lookat: Point3 = Point3::new(0.0, 0.0, 0.0);
+    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus: f64 = 10.0;
+    let aperture: f64 = 0.0;
+
+    Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0)
 }

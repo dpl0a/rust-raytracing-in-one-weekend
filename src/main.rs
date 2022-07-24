@@ -26,15 +26,12 @@ fn main() {
     let max_depth: i32 = 50;
 
     // World
-    let world: Box<dyn Hittable> = Box::new(random_scene(true));
+    //let world: Box<dyn Hittable> = Box::new(random_scene(true));
+    let world: Box<dyn Hittable> = Box::new(two_spheres());
 
     // Camera
-    let lookfrom: Point3 = Point3::new(13.0, 2.0, 3.0);
-    let lookat: Point3 = Point3::new(0.0, 0.0, 0.0);
-    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus: f64 = 10.0;
-    let aperture: f64 = 0.1;
-    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+    //let cam = random_scene_cam(aspect_ratio);
+    let cam = two_spheres_cam(aspect_ratio);
 
     render(filename, cam, &world, image_width, image_height, samples_per_pixel, max_depth);
 
