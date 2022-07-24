@@ -4,13 +4,16 @@ use crate::vec3::{Vec3, Color};
 use crate::ray::Ray;
 use crate::hittable::HitRecord;
 use crate::PRNG;
+use crate::texture::Texture;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
     Lambertian { albedo: Color },
+    Textured { texture: Texture },
     Metal { albedo: Color, fuzz: f64 },
-    Dielectric { refraction_index: f64 }
+    Dielectric { refraction_index: f64 },
 }
+
 
 fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     v - n * (2.0 * v.dot(n))
@@ -39,6 +42,15 @@ impl Material {
                     }
                     let scattered: Ray = Ray::new(rec.p, scatter_direction, r.time);
                     let attenuation: Color = *albedo;
+                    Some((scattered, attenuation))
+                }
+                Self::Textured { texture } => {
+                    let mut scatter_direction: Vec3 = rec.normal + Vec3::random_in_unit_sphere(rng);
+                    if scatter_direction.near_zero() {
+                        scatter_direction = rec.normal;
+                    }
+                    let scattered: Ray = Ray::new(rec.p, scatter_direction, r.time);
+                    let attenuation: Color = texture.value(rec.u, rec.v, rec.p);
                     Some((scattered, attenuation))
                 }
                 Self::Metal { albedo, fuzz } => {
@@ -72,15 +84,19 @@ impl Material {
             }
         }
 
-    pub fn new_lambertian(albedo: Color) -> Material {
+    pub fn new_lambertian(albedo: Color) -> Self {
         Self::Lambertian { albedo: albedo }
     }
 
-    pub fn new_metal(albedo: Color, fuzz: f64) -> Material {
+    pub fn new_textured(texture: Texture) -> Self {
+        Self::Textured { texture: texture }
+    }
+
+    pub fn new_metal(albedo: Color, fuzz: f64) -> Self {
         Self::Metal { albedo: albedo, fuzz: fuzz }
     }
 
-    pub fn new_dielectric(refraction_index: f64) -> Material {
+    pub fn new_dielectric(refraction_index: f64) -> Self {
         Self::Dielectric { refraction_index: refraction_index }
     }
 }

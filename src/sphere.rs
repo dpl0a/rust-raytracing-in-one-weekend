@@ -10,6 +10,12 @@ pub struct Sphere {
     pub material: Material,
 }
 
+pub fn get_sphere_uv(p: Point3) -> (f64, f64) {
+    let theta: f64 = (-p.y).acos();
+    let phi: f64 = (-p.z / p.y).atan() - std::f64::consts::PI;
+    (phi / (2.0 * std::f64::consts::PI), theta / std::f64::consts::PI)
+}
+
 impl Sphere {
     pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
         Self { center, radius, material }
@@ -31,12 +37,15 @@ impl Hittable for Sphere {
 
             for root in [root_1, root_2].iter() {
                 if (*root < t_max) && (*root > t_min) {
-                    let p = r.at(*root);
-                    let normal = (p - self.center) / self.radius;
-                    let front_face = r.direction.dot(normal) < 0.0;
+                    let p: Point3 = r.at(*root);
+                    let normal: Vec3 = (p - self.center) / self.radius;
+                    let front_face: bool = r.direction.dot(normal) < 0.0;
+                    let (u, v): (f64, f64) = get_sphere_uv(normal);
 
                     return Some(HitRecord {
                         t: *root,
+                        u: u,
+                        v: v,
                         p: p,
                         normal: if front_face { normal } else { -normal },
                         front_face: front_face,

@@ -2,6 +2,7 @@ use crate::vec3::{Vec3, Point3};
 use crate::material::Material;
 use crate::hittable::{Hittable, HitRecord};
 use crate::ray::Ray;
+use crate::sphere::get_sphere_uv;
 
 pub struct MovingSphere {
     pub center0: Point3,
@@ -45,9 +46,12 @@ impl Hittable for MovingSphere {
                     let p = r.at(*root);
                     let normal = (p - self.center(r.time)) / self.radius;
                     let front_face = r.direction.dot(normal) < 0.0;
+                    let (u, v) = get_sphere_uv(normal);
 
                     return Some(HitRecord {
                         t: *root,
+                        u: u,
+                        v: v,
                         p: p,
                         normal: if front_face { normal } else { -normal },
                         front_face: front_face,

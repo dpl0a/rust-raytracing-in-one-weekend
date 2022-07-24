@@ -5,6 +5,8 @@ use crate::material::Material;
 #[derive(Debug, Copy, Clone)]
 pub struct HitRecord<'mat> {
     pub t: f64,
+    pub u: f64,
+    pub v: f64,
     pub p: Point3,
     pub normal: Vec3,
     pub front_face: bool,
