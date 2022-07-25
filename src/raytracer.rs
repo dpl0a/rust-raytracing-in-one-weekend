@@ -41,7 +41,7 @@ fn ray_color(r: &Ray, background: Color, world: &Box<dyn Hittable>, depth: i32, 
                     attenuation * ray_color(&scattered, background, world, depth - 1, rng)
                 }
                 _ => {
-                    rec.material.emitted(rec.u, rec.v, rec.p)
+                    rec.material.emitted(rec.u, rec.v, &rec.p)
                 }
             }
         }

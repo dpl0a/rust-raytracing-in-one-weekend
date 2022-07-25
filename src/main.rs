@@ -1,9 +1,8 @@
 use std::time::Instant;
 use std::env;
 
-use ray_tracing_weekend::vec3::{Vec3, Point3, Color};
+use ray_tracing_weekend::vec3::Color;
 use ray_tracing_weekend::hittable::Hittable;
-use ray_tracing_weekend::camera::Camera;
 use ray_tracing_weekend::raytracer::render;
 use ray_tracing_weekend::scene::*;
 
@@ -20,9 +19,9 @@ fn main() {
 
     // Image
     let aspect_ratio: f64 = 1.0;
-    let image_width: usize = 1000;
+    let image_width: usize = 400;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
-    let samples_per_pixel: i32 = 10000;
+    let samples_per_pixel: i32 = 100;
     let max_depth: i32 = 50;
 
     // World
