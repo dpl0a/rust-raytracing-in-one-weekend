@@ -10,6 +10,8 @@ use crate::material::Material;
 use crate::moving_sphere::MovingSphere;
 use crate::texture::Texture;
 use crate::camera::Camera;
+use crate::rectangle::*;
+use crate::hbox::*;
 
 
 // Random scene from the end of book 1 (+ bounce and checkered ground)
@@ -98,15 +100,74 @@ pub fn two_spheres_cam(aspect_ratio: f64) -> Camera {
 }
 
 // ---
-// Two spheres, one is checkered, one is a light
-pub fn light_test() -> HittableList {
+// Test scene for light
+pub fn light_test1() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+    let checker: Material = Material::new_textured(Texture::new_checker(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
+    let light: Material = Material::new_light(Color::new(1.0, 1.0, 1.0));
+    let glass: Material = Material::new_dielectric(1.5);
+
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -10.0, 0.0), 10.0, checker)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 10.0, 0.0), 7.0, light)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), 0.5, glass)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 1.0, 0.0), -0.45, glass)));
+
+
+    let world = HittableList::new(object_list);
+    return world;
+}
+
+pub fn light_test2() -> HittableList {
     let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
     let checker: Material = Material::new_textured(Texture::new_checker(Color::new(0.2, 0.3, 0.1), Color::new(0.9, 0.9, 0.9)));
     let light: Material = Material::new_light(Color::new(1.0, 1.0, 1.0));
 
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -10.0, 0.0), 10.0, checker)));
-    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 10.0, 0.0), 8.0, light)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, checker)));
+    object_list.push(Box::new(Sphere::new(Point3::new(0.0, 2.0, 0.0), 2.0, checker)));
+    object_list.push(Box::new(XYRect::new(3.0, 5.0, 1.0, 3.0, -2.0, light)));
 
     let world = HittableList::new(object_list);
     return world;
+}
+
+pub fn light_test2_cam(aspect_ratio: f64) -> Camera {
+    let lookfrom: Point3 = Point3::new(26.0, 3.0, 6.0);
+    let lookat: Point3 = Point3::new(0.0, 2.0, 0.0);
+    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus: f64 = 10.0;
+    let aperture: f64 = 0.0;
+
+    Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0)
+}
+
+// Cornell box
+pub fn cornell() -> HittableList {
+    let mut object_list: Vec<Box<dyn Hittable>> = Vec::new();
+    let red: Material = Material::new_lambertian(Color::new(0.65, 0.05, 0.05));
+    let white: Material = Material::new_lambertian(Color::new(0.73, 0.73, 0.73));
+    let green: Material = Material::new_lambertian(Color::new(0.12, 0.45, 0.15));
+    let light: Material = Material::new_light(Color::new(15.0, 15.0, 15.0));
+
+    object_list.push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+    object_list.push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+    object_list.push(Box::new(XZRect::new(213.0, 343.0, 227.0, 332.0, 554.0, light)));
+    object_list.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white)));
+    object_list.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+    object_list.push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+
+    object_list.push(Box::new(HBox::new(Point3::new(130.0, 0.0, 65.0), Point3::new(295.0, 165.0, 230.0), white)));
+    object_list.push(Box::new(HBox::new(Point3::new(265.0, 0.0, 295.0), Point3::new(430.0, 330.0, 460.0), white)));
+
+    let world = HittableList::new(object_list);
+    return world;
+}
+
+pub fn cornell_cam(aspect_ratio: f64) -> Camera {
+    let lookfrom: Point3 = Point3::new(278.0, 278.0, -800.0);
+    let lookat: Point3 = Point3::new(278.0, 278.0, 0.0);
+    let vup: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus: f64 = 10.0;
+    let aperture: f64 = 0.0;
+
+    Camera::new(lookfrom, lookat, vup, 40.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0)
 }

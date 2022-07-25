@@ -19,20 +19,21 @@ fn main() {
     let filename: &str = &args[1];
 
     // Image
-    let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: usize = 800;
+    let aspect_ratio: f64 = 1.0;
+    let image_width: usize = 600;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
-    let samples_per_pixel: i32 = 500;
+    let samples_per_pixel: i32 = 200;
     let max_depth: i32 = 50;
 
     // World
     //let world: Box<dyn Hittable> = Box::new(random_scene(true));
-    let world: Box<dyn Hittable> = Box::new(light_test());
+    let world: Box<dyn Hittable> = Box::new(cornell());
     let background: Color = Color::new(0.0, 0.0, 0.0);
 
     // Camera
     //let cam = random_scene_cam(aspect_ratio);
-    let cam = two_spheres_cam(aspect_ratio);
+    //let cam = two_spheres_cam(aspect_ratio);
+    let cam = cornell_cam(aspect_ratio);
 
     render(filename, cam, &world, background, image_width, image_height, samples_per_pixel, max_depth);
 

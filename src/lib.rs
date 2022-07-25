@@ -9,5 +9,7 @@ pub mod raytracer;
 pub mod moving_sphere;
 pub mod texture;
 pub mod scene;
+pub mod rectangle;
+pub mod hbox;
 
 pub type PRNG = rand_xoshiro::Xoroshiro128Plus;
