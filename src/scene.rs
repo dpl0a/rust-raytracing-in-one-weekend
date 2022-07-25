@@ -3,7 +3,7 @@ use rand_xoshiro::rand_core::SeedableRng;
 use rand_xoshiro::Xoroshiro128Plus;
 
 use crate::vec3::{Vec3, Point3, Color};
-use crate::hittable::Hittable;
+use crate::hittable::*;
 use crate::hittable_list::HittableList;
 use crate::sphere::Sphere;
 use crate::material::Material;
@@ -155,8 +155,10 @@ pub fn cornell() -> HittableList {
     object_list.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
     object_list.push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
 
-    object_list.push(Box::new(HBox::new(Point3::new(130.0, 0.0, 65.0), Point3::new(295.0, 165.0, 230.0), white)));
-    object_list.push(Box::new(HBox::new(Point3::new(265.0, 0.0, 295.0), Point3::new(430.0, 330.0, 460.0), white)));
+    let box1 = Box::new(Translate::new(Box::new(RotateY::new(Box::new(HBox::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 165.0, 165.0), white)), -18.0)), Vec3::new(130.0, 0.0, 65.0)));
+    let box2 = Box::new(Translate::new(Box::new(RotateY::new(Box::new(HBox::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 330.0, 165.0), white)), 15.0)), Vec3::new(265.0, 0.0, 295.0)));
+    object_list.push(box1);
+    object_list.push(box2);
 
     let world = HittableList::new(object_list);
     return world;

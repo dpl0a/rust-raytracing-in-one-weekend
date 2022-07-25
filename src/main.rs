@@ -20,9 +20,9 @@ fn main() {
 
     // Image
     let aspect_ratio: f64 = 1.0;
-    let image_width: usize = 600;
+    let image_width: usize = 1000;
     let image_height: usize = ((image_width as f64) / aspect_ratio) as usize;
-    let samples_per_pixel: i32 = 200;
+    let samples_per_pixel: i32 = 10000;
     let max_depth: i32 = 50;
 
     // World
