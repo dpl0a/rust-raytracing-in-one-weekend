@@ -14,13 +14,13 @@ pub struct MovingSphere {
 }
 
 impl MovingSphere {
-    pub fn new(center0: Point3, center1: Point3, time0: f64, time1: f64, radius: f64, material: Material) -> Self {
+    pub fn new(center0: Point3, center1: Point3, time0: f64, time1: f64, radius: f64, material: &Material) -> Self {
         Self { center0: center0,
                center1: center1,
                time0: time0,
                time1: time1,
                radius: radius,
-               material: material }
+               material: *material }
     }
 
     pub fn center(&self, time: f64) -> Point3 {
@@ -32,7 +32,7 @@ impl Hittable for MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc: Vec3 = r.origin - self.center(r.time);
         let a: f64 = r.direction.sqlen();
-        let b: f64 = oc.dot(r.direction);
+        let b: f64 = oc.dot(&r.direction);
         let c: f64 = oc.sqlen() - self.radius * self.radius;
         let discriminant: f64 = (b * b) - (a * c);
 
@@ -45,8 +45,8 @@ impl Hittable for MovingSphere {
                 if (*root < t_max) && (*root > t_min) {
                     let p = r.at(*root);
                     let normal = (p - self.center(r.time)) / self.radius;
-                    let front_face = r.direction.dot(normal) < 0.0;
-                    let (u, v) = get_sphere_uv(normal);
+                    let front_face = r.direction.dot(&normal) < 0.0;
+                    let (u, v) = get_sphere_uv(&normal);
 
                     return Some(HitRecord {
                         t: *root,

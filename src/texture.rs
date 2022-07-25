@@ -6,7 +6,7 @@ pub enum Texture {
 }
 
 impl Texture {
-    pub fn value(&self, _u: f64, _v: f64, p: Point3) -> Color {
+    pub fn value(&self, _u: f64, _v: f64, p: &Point3) -> Color {
         match self {
             Self::Checker { even, odd } => {
                 let sines: f64 = (p.x * 10.0).sin() * (p.y * 10.0).sin() * (p.z * 10.0).sin();
@@ -15,7 +15,7 @@ impl Texture {
         }
     }
 
-    pub fn new_checker(even: Color, odd: Color) -> Self {
-        Self::Checker { even: even, odd: odd }
+    pub fn new_checker(even: &Color, odd: &Color) -> Self {
+        Self::Checker { even: *even, odd: *odd }
     }
 }

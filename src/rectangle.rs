@@ -31,20 +31,20 @@ pub struct YZRect {
 }
 
 impl XYRect {
-    pub fn new(x0: f64, x1: f64, y0: f64, y1: f64, k: f64, material: Material) -> Self {
-        Self { x0: x0, x1: x1, y0: y0, y1: y1, k: k, material: material }
+    pub fn new(x0: f64, x1: f64, y0: f64, y1: f64, k: f64, material: &Material) -> Self {
+        Self { x0: x0, x1: x1, y0: y0, y1: y1, k: k, material: *material }
     }
 }
 
 impl XZRect {
-    pub fn new(x0: f64, x1: f64, z0: f64, z1: f64, k: f64, material: Material) -> Self {
-        Self { x0: x0, x1: x1, z0: z0, z1: z1, k: k, material: material }
+    pub fn new(x0: f64, x1: f64, z0: f64, z1: f64, k: f64, material: &Material) -> Self {
+        Self { x0: x0, x1: x1, z0: z0, z1: z1, k: k, material: *material }
     }
 }
 
 impl YZRect {
-    pub fn new(y0: f64, y1: f64, z0: f64, z1: f64, k: f64, material: Material) -> Self {
-        Self { y0: y0, y1: y1, z0: z0, z1: z1, k: k, material: material }
+    pub fn new(y0: f64, y1: f64, z0: f64, z1: f64, k: f64, material: &Material) -> Self {
+        Self { y0: y0, y1: y1, z0: z0, z1: z1, k: k, material: *material }
     }
 }
 
@@ -63,7 +63,7 @@ impl Hittable for XYRect {
         let v: f64 = (y - self.y0) / (self.y1 - self.y0);
         let normal: Vec3 = Vec3::new(0.0, 0.0, 1.0);
         let p: Point3 = r.at(t);
-        let front_face: bool = r.direction.dot(normal) < 0.0;
+        let front_face: bool = r.direction.dot(&normal) < 0.0;
 
         Some(HitRecord { 
             t: t,
@@ -92,7 +92,7 @@ impl Hittable for XZRect {
         let v: f64 = (z - self.z0) / (self.z1 - self.z0);
         let normal: Vec3 = Vec3::new(0.0, 1.0, 0.0);
         let p: Point3 = r.at(t);
-        let front_face: bool = r.direction.dot(normal) < 0.0;
+        let front_face: bool = r.direction.dot(&normal) < 0.0;
 
         Some(HitRecord { 
             t: t,
@@ -121,7 +121,7 @@ impl Hittable for YZRect {
         let v: f64 = (z - self.z0) / (self.z1 - self.z0);
         let normal: Vec3 = Vec3::new(1.0, 0.0, 0.0);
         let p: Point3 = r.at(t);
-        let front_face: bool = r.direction.dot(normal) < 0.0;
+        let front_face: bool = r.direction.dot(&normal) < 0.0;
 
         Some(HitRecord { 
             t: t,

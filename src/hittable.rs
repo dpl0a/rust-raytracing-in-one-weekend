@@ -15,7 +15,7 @@ pub struct HitRecord<'mat> {
 
 impl<'mat> HitRecord<'mat> {
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
-	    self.front_face = Vec3::dot(r.direction, outward_normal) < 0.0;
+	    self.front_face = Vec3::dot(&r.direction, &outward_normal) < 0.0;
         self.normal = if self.front_face { outward_normal } else { -outward_normal }
     }
 }
@@ -37,10 +37,10 @@ impl Translate {
 
 impl Hittable for Translate {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let moved_r: Ray = Ray::new(r.origin - self.offset, r.direction, r.time);
+        let moved_r: Ray = Ray::new(&(r.origin - self.offset), &r.direction, r.time);
         match self.object.hit(&moved_r, t_min, t_max) {
             Some(rec) => {
-                let front_face: bool = moved_r.direction.dot(rec.normal) < 0.0;
+                let front_face: bool = moved_r.direction.dot(&rec.normal) < 0.0;
                 let p = rec.p + self.offset;
 
                 Some(HitRecord {
@@ -81,7 +81,7 @@ impl Hittable for RotateY {
                                             r.direction.y,
                                             self.sin_theta * r.direction.x + self.cos_theta * r.direction.z);
 
-        let rotated_r: Ray = Ray::new(origin, direction, r.time);
+        let rotated_r: Ray = Ray::new(&origin, &direction, r.time);
         match self.object.hit(&rotated_r, t_min, t_max) {
             Some (rec) => {
                 let p: Point3 = Point3::new(self.cos_theta * rec.p.x + self.sin_theta * rec.p.z,
@@ -90,7 +90,7 @@ impl Hittable for RotateY {
                 let normal: Point3 = Point3::new(self.cos_theta * rec.normal.x + self.sin_theta * rec.normal.z,
                                                  rec.normal.y,
                                                  -self.sin_theta * rec.normal.x + self.cos_theta * rec.normal.z);
-                let front_face: bool = rotated_r.direction.dot(normal) < 0.0;
+                let front_face: bool = rotated_r.direction.dot(&normal) < 0.0;
 
                 Some(HitRecord {
                     t: rec.t,

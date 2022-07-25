@@ -18,26 +18,26 @@ impl Vec3 {
         Self { x: x, y: y, z: z }
     }
 
-    pub fn sqlen(self) -> f64 {
+    pub fn sqlen(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn len(self) -> f64 {
+    pub fn len(&self) -> f64 {
         self.sqlen().sqrt()
     }
 
-    pub fn dot(self, other: Self) -> f64 {
+    pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    pub fn cross(self, other: Self) -> Self {
+    pub fn cross(&self, other: &Self) -> Self {
         Self { x: self.y * other.z - self.z * other.y, 
                y: self.z * other.x - self.x * other.z, 
                z: self.x * other.y - self.y * other.x }
     }
 
-    pub fn normalize(self) -> Self {
-        self / self.len()
+    pub fn normalize(&self) -> Self {
+        *self / self.len()
     }
 
     pub fn random(min: f64, max: f64) -> Self {
@@ -68,7 +68,7 @@ impl Vec3 {
         }
     }
 
-    pub fn near_zero(self) -> bool {
+    pub fn near_zero(&self) -> bool {
         let s: f64 = 1e-8;
         (self.x.abs() < s) && (self.y.abs() < s) && (self.z.abs() < s)
     }
@@ -141,11 +141,5 @@ impl Div<f64> for Vec3 {
         Self { x: self.x / k, 
                y: self.y / k, 
                z: self.z / k }
-    }
-}
-
-impl PartialEq for Vec3 {
-    fn eq(&self, other: &Vec3) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
     }
 }
